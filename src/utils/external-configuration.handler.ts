@@ -1,5 +1,5 @@
 import { HttpClient } from '@angular/common/http';
-import { ExternalConfiguration } from "../ExternalConfiguration";
+import { ExternalConfiguration } from "../external-configuration";
 
 export interface ExternalConfigurationHandler {
     deserialize();
