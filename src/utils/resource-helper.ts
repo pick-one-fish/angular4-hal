@@ -37,10 +37,10 @@ export class ResourceHelper {
                 params = params.append('size', options.size.toString());
             }
             if (options.sort) {
-                for (const s of options.sort) {
+                for (const _sort of options.sort) {
                     let sortString = '';
-                    sortString = s.path ? sortString.concat(s.path) : sortString;
-                    sortString = s.order ? sortString.concat(',').concat(s.order) : sortString;
+                    sortString = _sort.path ? sortString.concat(_sort.path) : sortString;
+                    sortString = _sort.order ? sortString.concat(',').concat(_sort.order) : sortString;
                     params = params.append('sort', sortString);
                 }
             }
@@ -63,13 +63,13 @@ export class ResourceHelper {
         for (const key in resource) {
             if (!isNullOrUndefined(resource[key])) {
                 if (ResourceHelper.className(resource[key])
-                    .find((className: string) => className == 'Resource') || resource[key]['_links']) {
+                    .find((className: string) => className === 'Resource') || resource[key]['_links']) {
                     if (resource[key]['_links'])
                         result[key] = resource[key]['_links']['self']['href'];
                 } else if (Array.isArray(resource[key])) {
-                    let array: any[] = resource[key];
+                    const array: any[] = resource[key];
                     if (array) {
-                        result[key] = new Array();
+                        result[key] = [];
                         array.forEach((element) => {
                             if (isPrimitive(element)) {
                                 result[key].push(element);
@@ -87,19 +87,21 @@ export class ResourceHelper {
     }
 
     static createEmptyResult<T extends Resource>(_embedded: string): ResourceArray<T> {
-        let resourceArray: ResourceArray<T> = new ResourceArray<T>();
-        resourceArray._embedded = _embedded;
+        const resourceArray: ResourceArray<T> = new ResourceArray<T>();
+        if (!isNullOrUndefined(_embedded)) {
+            resourceArray._embedded = _embedded;
+        }
         return resourceArray;
     }
 
     static getClassName(obj: any): string {
-        var funcNameRegex = /function (.+?)\(/;
-        var results = (funcNameRegex).exec(obj.constructor.toString());
+        const funcNameRegex = /function (.+?)\(/;
+        const results = (funcNameRegex).exec(obj.constructor.toString());
         return (results && results.length > 1) ? results[1] : '';
     }
 
     static className(objProto: any): string[] {
-        let classNames = [];
+        const classNames = [];
         let obj = Object.getPrototypeOf(objProto);
         let className: string;
 
@@ -107,7 +109,6 @@ export class ResourceHelper {
             classNames.push(className);
             obj = Object.getPrototypeOf(obj);
         }
-
         return classNames;
     }
 
@@ -119,47 +120,42 @@ export class ResourceHelper {
         }
     }
 
-    static instantiateResourceCollection<T extends Resource>(type: { new(): T }, response: HttpResponse<any>,
-                                                             result: ResourceArray<T>, builder?: SubTypeBuilder): ResourceArray<T> {
-
-        if (response.status >= 200 && response.status <= 207) {
-            let payload = response.body;
-            if (payload[result._embedded]) {
-                for (const embeddedClassName of Object.keys(payload[result._embedded])) {
-                    let embedded: any = payload[result._embedded];
-                    const items = embedded[embeddedClassName];
-                    for (let item of items) {
-                        let instance: T = new type();
-                        instance = this.searchSubtypes(builder, embeddedClassName, instance);
-
-                        this.instantiateResource(instance, item);
-                        result.push(instance);
-                    }
-                }
-            }
-
-            result.totalElements = payload.page ? payload.page.totalElements : result.length;
-            result.totalPages = payload.page ? payload.page.totalPages : 1;
-            result.pageNumber = payload.page ? payload.page.number : 1;
-            result.pageSize = payload.page ? payload.page.size : 20;
-
-            result.self_uri = payload._links && payload._links.self ? payload._links.self.href : undefined;
-            result.next_uri = payload._links && payload._links.next ? payload._links.next.href : undefined;
-            result.prev_uri = payload._links && payload._links.prev ? payload._links.prev.href : undefined;
-            result.first_uri = payload._links && payload._links.first ? payload._links.first.href : undefined;
-            result.last_uri = payload._links && payload._links.last ? payload._links.last.href : undefined;
-        } else if (response.status == 404) {
-            result.result = [];
+    static instantiateResourceCollection<T extends Resource>
+    (type: { new(): T }, payload: any, result: ResourceArray<T>, builder?: SubTypeBuilder): ResourceArray<T> {
+        if (isNullOrUndefined(result) || isNullOrUndefined(payload[result._embedded])) {
+            return;
         }
+
+        for (const embeddedClassName of Object.keys(payload[result._embedded])) {
+            const embedded: any = payload[result._embedded];
+            const items = embedded[embeddedClassName];
+            for (const item of items) {
+                let instance: T = new type();
+                instance = this.searchSubtypes(builder, embeddedClassName, instance);
+                instance = this.instantiateResource(instance, item);
+                result.push(instance);
+            }
+        }
+
+        result.totalElements = payload.page ? payload.page.totalElements : result.length();
+        result.totalPages = payload.page ? payload.page.totalPages : 1;
+        result.pageNumber = payload.page ? payload.page.number : 1;
+        result.pageSize = payload.page ? payload.page.size : 20;
+
+        result.self_uri = payload._links && payload._links.self ? payload._links.self.href : undefined;
+        result.next_uri = payload._links && payload._links.next ? payload._links.next.href : undefined;
+        result.prev_uri = payload._links && payload._links.prev ? payload._links.prev.href : undefined;
+        result.first_uri = payload._links && payload._links.first ? payload._links.first.href : undefined;
+        result.last_uri = payload._links && payload._links.last ? payload._links.last.href : undefined;
         return result;
     }
 
     static searchSubtypes<T extends Resource>(builder: SubTypeBuilder, embeddedClassName: string, instance: T) {
         if (builder && builder.subtypes) {
-            let keys = builder.subtypes.keys();
-            Array.from(keys).forEach((subtypeKey: string) => {
-                if (embeddedClassName.toLowerCase().startsWith(subtypeKey.toLowerCase())) {
-                    let subtype: { new(): any } = builder.subtypes.get(subtypeKey);
+            const keys = builder.subtypes.keys();
+            Array.from(keys).forEach((subtypesKey: string) => {
+                if (embeddedClassName.toLocaleLowerCase().startsWith(subtypesKey.toLocaleLowerCase())) {
+                    const subtype: { new(): any } = builder.subtypes.get(subtypesKey);
                     instance = new subtype();
                 }
             });
@@ -169,11 +165,12 @@ export class ResourceHelper {
 
     static instantiateResource<T extends Resource>(entity: T, payload: Object): T {
         for (const p in payload) {
-            //TODO array initClearCacheProcess
-            /* if(entity[p].constructor === Array && isNullOrUndefined(payload[p]))
-                 entity[p] = [];
-             else*/
-            entity[p] = payload[p];
+            // TODO: array init
+            if (!isNullOrUndefined(entity[p]) && isNullOrUndefined(payload[p]) && entity[p].constructor === Array) {
+                entity[p] = [];
+            } else {
+                entity[p] = payload[p];
+            }
         }
         return entity;
     }
@@ -193,17 +190,14 @@ export class ResourceHelper {
     }
 
     private static addSlash(uri: string): string {
-        let uriParsed = url.parse(uri);
-        if (isNullOrUndefined(uriParsed.search) && uri && uri[uri.length - 1] != '/')
-            return uri + '/';
-        return uri;
+        const uriParsed = url.parse(uri);
+        return (isNullOrUndefined(uriParsed.search) && uri && uri[uri.length] !== '/') ? uri + '/' : uri;
     }
 
-    public static getProxy(url: string): string {
-        url = url.replace('{?projection}', '');
-        if (!ResourceHelper.proxy_uri || ResourceHelper.proxy_uri == '')
-            return url;
-        return ResourceHelper.addSlash(url.replace(ResourceHelper.root_uri, ResourceHelper.proxy_uri));
+
+    public static getProxy(_url: string): string {
+        return (!ResourceHelper.proxy_uri || ResourceHelper.proxy_uri === '') ? _url :
+            ResourceHelper.addSlash(_url.replace(ResourceHelper.proxy_uri, ResourceHelper.proxy_uri));
     }
 
     public static setHttp(http: HttpClient) {
@@ -214,7 +208,25 @@ export class ResourceHelper {
         return this.http;
     }
 
-    static getRootUri() {
+    public static getRootUri() {
         return this.root_uri;
+    }
+
+
+    public static replaceOrAdd(query: string, field: string, value: string): string {
+        if (query) {
+            const idx: number = query.indexOf(field);
+            const idxNextAmp: number = query.indexOf('&', idx) === -1 ? query.indexOf('/', idx) : query.indexOf('&', idx);
+
+            if (idx !== -1) {
+                const searchValue = query.substring(idx, idxNextAmp);
+                query = query.replace(searchValue, field + '=' + value);
+            } else {
+                query = query.concat('&' + field + '=' + value);
+            }
+        } else {
+            query = '?' + field + '=' + value;
+        }
+        return query;
     }
 }
