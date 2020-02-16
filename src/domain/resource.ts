@@ -1,17 +1,16 @@
-import {of as observableOf, throwError as observableThrowError} from 'rxjs';
+import { Observable, of as observableOf, throwError as observableThrowError } from 'rxjs';
 
-import {catchError, map} from 'rxjs/operators';
-import {HttpParams} from '@angular/common/http';
-import {ResourceHelper} from './resource-helper';
-import {ResourceArray} from './resource-array';
+import { catchError, map } from 'rxjs/operators';
+import { HttpParams } from '@angular/common/http';
+import { ResourceArray } from './resource-array';
+import { Injectable } from "@angular/core";
+import { ResourceHelper } from "../utils/resource-helper";
+import { CacheHelper } from "../cache/cache.helper";
+import { SubTypeBuilder } from "../utils/sub-type-builder";
+import { isNullOrUndefined } from "util";
+import { CustomEncoder } from "../CustomEncoder";
+import { HalOptions } from "./hal-options";
 
-import {HalOptions} from './rest.service';
-import {SubTypeBuilder} from './subtype-builder';
-import {Injectable} from '@angular/core';
-import {CustomEncoder} from './CustomEncoder';
-import {Utils} from './Utils';
-import {Observable} from 'rxjs/internal/Observable';
-import {CacheHelper} from './cache/cache.helper';
 
 export type Link = { href: string, templated?: boolean };
 export type Links = { [key: string]: Link };
@@ -79,7 +78,7 @@ export abstract class Resource {
                                                 isCacheActive: boolean = true): Observable<T[]> {
 
         const params = ResourceHelper.optionParams(new HttpParams({encoder: new CustomEncoder()}), options);
-        const result: ResourceArray<T> = ResourceHelper.createEmptyResult<T>(Utils.isNullOrUndefined(_embedded) ? '_embedded' : _embedded);
+        const result: ResourceArray<T> = ResourceHelper.createEmptyResult<T>(isNullOrUndefined(_embedded) ? '_embedded' : _embedded);
         if (this.existRelationLink(relation)) {
             if (CacheHelper.ifPresent(this.getRelationLinkHref(relation), null, options, isCacheActive))
                 return observableOf(CacheHelper.getArray(this.getRelationLinkHref(relation)));
@@ -164,7 +163,7 @@ export abstract class Resource {
     }
 
     private existRelationLink(relation: string): boolean {
-        return !Utils.isNullOrUndefined(this._links) && !Utils.isNullOrUndefined(this._links[relation]);
+        return !isNullOrUndefined(this._links) && !isNullOrUndefined(this._links[relation]);
     }
 
     // Adds the given resource to the bound collection by the relation

@@ -1,29 +1,28 @@
-import {Observable, throwError as observableThrowError} from 'rxjs';
+import { Observable, throwError as observableThrowError } from 'rxjs';
 
-import {catchError, map} from 'rxjs/operators';
-import {Sort} from './sort';
-import {ArrayInterface} from './array-interface';
-import {ResourceHelper} from './resource-helper';
-import {Resource} from './resource';
+import { catchError, map } from 'rxjs/operators';
+import { Sort } from './sort';
+import { ArrayInterface } from './array-interface';
+import { ResourceHelper } from '../utils/resource-helper';
+import { Resource } from './resource';
 import * as url from 'url';
 
 export class ResourceArray<T extends Resource> implements ArrayInterface<T> {
-    public sortInfo: Sort[];
 
     public proxyUrl: string;
     public rootUrl: string;
 
     public self_uri: string;
-    public next_uri: string;
-    public prev_uri: string;
     public first_uri: string;
+    public prev_uri: string;
+    public next_uri: string;
     public last_uri: string;
 
     public _embedded;
-
-    public totalElements = 0;
-    public totalPages = 1;
-    public pageNumber = 1;
+    public sortInfo: Sort[];
+    public totalElements: number;
+    public totalPages: number;
+    public pageNumber: number;
     public pageSize: number;
 
     public result: T[] = [];
@@ -46,7 +45,10 @@ export class ResourceArray<T extends Resource> implements ArrayInterface<T> {
 // Load next page
     next = (type: { new(): T }): Observable<ResourceArray<T>> => {
         if (this.next_uri) {
-            return ResourceHelper.getHttp().get(ResourceHelper.getProxy(this.next_uri), {headers: ResourceHelper.headers, observe: 'response'}).pipe(
+            return ResourceHelper.getHttp().get(ResourceHelper.getProxy(this.next_uri), {
+                headers: ResourceHelper.headers,
+                observe: 'response'
+            }).pipe(
                 map(response => this.init(type, response, this.sortInfo)),
                 catchError(error => observableThrowError(error)),);
         }
@@ -55,7 +57,10 @@ export class ResourceArray<T extends Resource> implements ArrayInterface<T> {
 
     prev = (type: { new(): T }): Observable<ResourceArray<T>> => {
         if (this.prev_uri) {
-            return ResourceHelper.getHttp().get(ResourceHelper.getProxy(this.prev_uri), {headers: ResourceHelper.headers, observe: 'response'}).pipe(
+            return ResourceHelper.getHttp().get(ResourceHelper.getProxy(this.prev_uri), {
+                headers: ResourceHelper.headers,
+                observe: 'response'
+            }).pipe(
                 map(response => this.init(type, response, this.sortInfo)),
                 catchError(error => observableThrowError(error)),);
         }
@@ -66,7 +71,10 @@ export class ResourceArray<T extends Resource> implements ArrayInterface<T> {
 
     first = (type: { new(): T }): Observable<ResourceArray<T>> => {
         if (this.first_uri) {
-            return ResourceHelper.getHttp().get(ResourceHelper.getProxy(this.first_uri), {headers: ResourceHelper.headers, observe: 'response'}).pipe(
+            return ResourceHelper.getHttp().get(ResourceHelper.getProxy(this.first_uri), {
+                headers: ResourceHelper.headers,
+                observe: 'response'
+            }).pipe(
                 map(response => this.init(type, response, this.sortInfo)),
                 catchError(error => observableThrowError(error)),);
         }
@@ -77,7 +85,10 @@ export class ResourceArray<T extends Resource> implements ArrayInterface<T> {
 
     last = (type: { new(): T }): Observable<ResourceArray<T>> => {
         if (this.last_uri) {
-            return ResourceHelper.getHttp().get(ResourceHelper.getProxy(this.last_uri), {headers: ResourceHelper.headers, observe: 'response'}).pipe(
+            return ResourceHelper.getHttp().get(ResourceHelper.getProxy(this.last_uri), {
+                headers: ResourceHelper.headers,
+                observe: 'response'
+            }).pipe(
                 map(response => this.init(type, response, this.sortInfo)),
                 catchError(error => observableThrowError(error)),);
         }

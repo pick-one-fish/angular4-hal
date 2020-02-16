@@ -1,15 +1,19 @@
-import {ExternalConfiguration} from './ExternalConfiguration';
-import {HttpClient} from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
+import { ExternalConfiguration } from "../ExternalConfiguration";
 
-export interface ExternalConfigurationHandlerInterface {
+export interface ExternalConfigurationHandler {
     deserialize();
+
     serialize();
 
     getProxyUri(): string;
+
     getRootUri(): string;
+
     getHttp(): HttpClient;
 
 
     getExternalConfiguration(): ExternalConfiguration;
+
     setExternalConfiguration(externalConfiguration: ExternalConfiguration);
 }
