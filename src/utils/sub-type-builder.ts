@@ -1,4 +1,3 @@
 export interface SubTypeBuilder {
-
-  subtypes: Map<String, any>;
+    subtypes: Map<string, any>;
 }
