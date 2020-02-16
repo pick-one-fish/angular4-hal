@@ -1,5 +1,5 @@
 {
-  "name": "ngx-hal",
+  "name": "ngx-spring-hal",
   "version": "7.9.0",
   "description": "This Angular module offers a HAL/JSON http-client to easily interact with a Spring Data Rest API or any API that implements the Spring Data Rest resource model",
   "author": "pickonefish",
@@ -27,11 +27,11 @@
     "Angular 8"
   ],
   "issues": {
-    "url": "https://github.com/pickonefish/ngx-hal/issues"
+    "url": "https://github.com/pickonefish/ngx-spring-hal/issues"
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/pickonefish/ngx-hal.git"
+    "url": "https://github.com/pickonefish/ngx-spring-hal.git"
   },
   "devDependencies": {
     "@angular/cli": "7.3.7",
