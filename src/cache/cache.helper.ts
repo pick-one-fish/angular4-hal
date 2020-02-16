@@ -1,6 +1,6 @@
-import {Resource} from '../resource';
 import * as hash from 'hash.js';
-import {HalOptions} from '../rest.service';
+import { Resource } from "../domain/resource";
+import { HalOptions } from "../domain/hal-options";
 
 export type ResourceExpire<T extends Resource> = { entity: any, body?: any, params?: HalOptions, expire: number };
 

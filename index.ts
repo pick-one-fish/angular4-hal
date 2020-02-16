@@ -5,16 +5,15 @@ import { ExternalService } from './src/external.service';
 import { ResourceService } from './src/resource.service';
 
 import 'rxjs';
-import { AuthInterceptor } from "./src/interceptor/AuthInterceptor";
-import { TokenConfig } from "./src/TokenConfig";
-import { TokenConfigService } from "./src/interceptor/TokenConfigService";
+import { AuthInterceptor } from "./src/interceptor/auth-interceptor";
+import { TokenConfig } from "./src/domain/token-config";
+import { TokenConfigService } from "./src/interceptor/token-config.service";
 
 export { ExternalService } from './src/external.service';
 export { RestService } from './src/rest.service';
 export { CacheHelper } from './src/cache/cache.helper';
 export { EvictStrategy } from './src/cache/cache.helper';
 export { ResourceExpire } from './src/cache/cache.helper';
-export { ExternalConfiguration } from './src/ExternalConfiguration';
 
 @NgModule({
     imports: [HttpClientModule],

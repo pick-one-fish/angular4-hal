@@ -8,7 +8,7 @@ import { ResourceHelper } from "../utils/resource-helper";
 import { CacheHelper } from "../cache/cache.helper";
 import { SubTypeBuilder } from "../utils/sub-type-builder";
 import { isNullOrUndefined } from "util";
-import { CustomEncoder } from "../CustomEncoder";
+import { CustomEncoder } from "../custom-encoder";
 import { HalOptions } from "./hal-options";
 
 
